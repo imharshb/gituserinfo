@@ -1,0 +1,13 @@
+HTTP/1.1 401 Unauthorized
+Server: nginx
+Date: Tue, 18 Jun 2019 06:09:06 GMT
+Content-Type: application/json
+Content-Length: 88
+Connection: keep-alive
+Access-Control-Allow-Origin: https://sendgrid.api-docs.io
+Access-Control-Allow-Methods: POST
+Access-Control-Allow-Headers: Authorization, Content-Type, On-behalf-of, x-sg-elas-acl
+Access-Control-Max-Age: 600
+X-No-CORS-Reason: https://sendgrid.com/docs/Classroom/Basics/API/cors.html
+
+{"errors":[{"message":"Permission denied, wrong credentials","field":null,"help":null}]}

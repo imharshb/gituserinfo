@@ -1,0 +1,9 @@
+
+<ul>
+{% for value in dictionary %}
+    <li><form class="form-signin" id="login_form" method="post" action="/app/{{ login }}/repos/{{ value }}/">
+      {% csrf_token %}
+      <button class="btn btn-lg btn-primary btn-block" type="submit">{{ value }}</button>
+    </form></li>
+{% endfor %}
+</ul>
