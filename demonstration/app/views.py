@@ -28,7 +28,7 @@ def profile(request):
             userData['followers'] = data['followers']
             userData['following'] = data['following']
             userData['login'] = data['login']
-            print(userData)
+            #print(userData)
 
         parsedData.append(userData)
 
@@ -98,6 +98,3 @@ def commits(request, login, value):
             userData1.append(data1['commit']['message'])
 
     return render(request, 'app/commits.html', {'dictionary': userData1})
-
-
-#/repos/:owner/:repo/languages
