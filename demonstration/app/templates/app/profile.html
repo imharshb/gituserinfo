@@ -33,6 +33,7 @@
                 <thead>
                 <tr>
                   <th class="header"> Username <i class="icon-sort"></i></th>
+                  <th class="header"> name <i class="icon-sort"></i></th>
                   <th class="header"> Blog <i class="icon-sort"></i></th>
                   <th class="header"> Location <i class="icon-sort"></i></th>
                   <th class="header"> Public Repos <i class="icon-sort"></i></th>
@@ -48,6 +49,7 @@
 
             {% for key in data %}
                 <tr>
+                    <td>{{ key.login }}</td>
                     <td>{{ key.name }}</td>
                     <td>{{ key.blog }}</td>
                     <td>{{ key.location }}</td>

@@ -1,7 +1,9 @@
 from django.shortcuts import render, HttpResponse
 from .models import UserInfo
 import requests
-
+import psycopg2
+#import datetime
+from django.utils import timezone
 import json
 
 def index(requests):
@@ -12,40 +14,73 @@ def test(requests):
 
 def profile(request):
     parsedData = []
+    #userData = {}
     if request.method == 'POST':
         username = request.POST.get('user')
-        req = requests.get('https://api.github.com/users/' + username)
-        jsonList = []
-        jsonList.append(json.loads(req.content))
-        userData = {}
-        for data in jsonList:
-            userData['name'] = data['name']
-            userData['blog'] = data['blog']
-            userData['location'] = data['location']
-            userData['email'] = data['email']
-            userData['public_gists'] = data['public_gists']
-            userData['public_repos'] = data['public_repos']
-            userData['followers'] = data['followers']
-            userData['following'] = data['following']
-            userData['login'] = data['login']
-            #print(userData)
+        # queryset
+        user_object = UserInfo.objects.filter(user_id__iexact=username)
+        count = user_object.count()
 
-        parsedData.append(userData)
-
-        count = UserInfo.objects.filter(user_id=userData['login']).count()
         if count == 0:
+            req = requests.get('https://api.github.com/users/' + username)
+            userData = repeat(req)
+            parsedData.append(userData)
+
             UserInfo.objects.create(
                 user_id=userData['login'],
                 name=userData['name'],
                 blog=userData['blog'],
                 location=userData['location'],
+                email=userData['email'],
                 public_gists_count=userData['public_gists'],
                 public_repos_count=userData['public_repos'],
                 follower_count=userData['followers'],
                 following_count=userData['following'],
             )
 
+        else:
+            user = user_object.first()
+            timediff = timezone.now() - user.fetched_data_timestamp
+            if timediff.seconds <= 3600:
+                # single object
+                userData = {}
+
+                userData['login'] = user.user_id
+                userData['name'] = user.name
+                userData['blog'] = user.blog
+                userData['location'] = user.location
+                userData['email'] = user.email
+                userData['public_gists'] = user.public_gists_count
+                userData['public_repos'] = user.public_repos_count
+                userData['followers'] = user.follower_count
+                userData['following'] = user.following_count
+
+                parsedData.append(userData)
+
+            else:
+                req = requests.get('https://api.github.com/users/' + username)
+                userData = repeat(req)
+
+                user.user_id = userData['login']
+                user.name = userData['name']
+                user.blog = userData['blog']
+                user.location = userData['location']
+                user.email = userData['email']
+                user.public_gists_count = userData['public_gists']
+                user.public_repos_count =userData['public_repos']
+                user.follower_count = userData['followers']
+                user.following_count = userData['following']
+
+                user.save()
+
+                parsedData.append(userData)
+
     return render(request, 'app/profile.html', {'data': parsedData})
+
+    """else:
+    return HttpResponseNotFound('<h1>Page not found</h1>')"""
+
+
 
 def followers(request, login):
     if request.method == 'POST':
@@ -98,3 +133,23 @@ def commits(request, login, value):
             userData1.append(data1['commit']['message'])
 
     return render(request, 'app/commits.html', {'dictionary': userData1})
+
+def repeat(req):
+    jsonList = []
+    jsonList.append(json.loads(req.content))
+    userData = {}
+    for data in jsonList:
+        userData['login'] = data['login']
+        userData['name'] = data['name']
+        userData['blog'] = data['blog']
+        userData['location'] = data['location']
+        userData['email'] = data['email']
+        userData['public_gists'] = data['public_gists']
+        userData['public_repos'] = data['public_repos']
+        userData['followers'] = data['followers']
+        userData['following'] = data['following']
+
+    return userData
+
+
+
